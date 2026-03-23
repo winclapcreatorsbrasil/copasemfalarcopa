@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Manual do Creator — PicPay</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --nu: #21C25E;
+  --nu2: #7EFFA8;
+  --bg: #0c0c0c;
+  --bg2: #161616;
+  --bg3: #1f1f1f;
+  --line: rgba(255,255,255,.08);
+  --muted: rgba(255,255,255,.4);
+  --text: rgba(255,255,255,.88);
+  --red: #ff5c5c;
+  --green: #4ade80;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+}
+
+/* APP SHELL */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* TOP BAR */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  background: var(--bg);
+}
+
+.logo svg { display: block; }
+
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background .3s, transform .3s;
+}
+
+.dot.done { background: var(--nu2); }
+.dot.active { background: var(--nu2); transform: scale(1.4); }
+
+.progress-label {
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* SCREENS */
+.screens {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 28px 20px 100px;
+  opacity: 0;
+  transform: translateX(40px);
+  pointer-events: none;
+  transition: opacity .35s ease, transform .35s ease;
+}
+
+.screen.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: all;
+}
+
+.screen.exit {
+  opacity: 0;
+  transform: translateX(-40px);
+  pointer-events: none;
+}
+
+/* BOTTOM NAV */
+.bottombar {
+  padding: 12px 20px 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+
+.btn-back {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn-back:hover { border-color: rgba(255,255,255,.2); color: var(--text); }
+
+.btn-next {
+  flex: 2;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: var(--nu);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-next:hover { background: #18a84e; }
+.btn-next:active { transform: scale(.98); }
+
+.btn-next .arrow {
+  transition: transform .2s;
+}
+.btn-next:hover .arrow { transform: translateX(3px); }
+
+/* TYPOGRAPHY */
+.screen-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--nu2);
+  margin-bottom: 10px;
+}
+
+.screen-title {
+  font-family: 'Lora', serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 24px;
+  letter-spacing: -.01em;
+}
+
+/* CARD */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 12px;
+}
+
+.card-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.card-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(33,194,94,.15);
+  border: 1px solid rgba(33,194,94,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.card-text {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text);
+  font-weight: 300;
+  padding-top: 8px;
+}
+
+.card-text strong { font-weight: 500; color: #fff; }
+
+/* PROIBIDO */
+.proibido {
+  background: rgba(255,92,92,.06);
+  border: 1px solid rgba(255,92,92,.2);
+  border-radius: 16px;
+  padding: 18px;
+  margin-top: 4px;
+}
+
+.proibido-head {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--red);
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.tags { display: flex; flex-wrap: wrap; gap: 7px; }
+
+.tag {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(255,92,92,.1);
+  border: 1px solid rgba(255,92,92,.25);
+  color: rgba(255,150,150,.9);
+  text-decoration: line-through;
+  text-decoration-color: rgba(255,92,92,.4);
+}
+
+/* ROLES */
+.roles { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+
+.role {
+  border-radius: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+}
+
+.role.star {
+  border-color: rgba(33,194,94,.35);
+  background: rgba(33,194,94,.08);
+}
+
+.role-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.role-emoji { font-size: 20px; }
+.role-name {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+.role.star .role-name { color: var(--nu2); }
+
+.role-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* IFOOD BRIEF */
+.nu-card {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(33,194,94,.3);
+  margin-bottom: 12px;
+}
+
+.nu-header {
+  background: var(--nu);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nu-logo {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Lora', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.nu-header-text {}
+.nu-name { font-size: 15px; font-weight: 500; color: #fff; }
+.nu-sub { font-size: 11px; color: rgba(255,255,255,.6); }
+
+.nu-cols { display: grid; grid-template-columns: 1fr 1fr; }
+
+.nu-col {
+  padding: 16px 18px;
+  background: var(--bg2);
+}
+
+.nu-col:first-child { border-right: 1px solid rgba(33,194,94,.15); }
+
+.nu-col-head {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.nu-col.nope .nu-col-head { color: var(--red); }
+.nu-col.pode .nu-col-head { color: var(--green); }
+
+.nu-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+.nu-col ul li {
+  font-size: 12px;
+  color: rgba(255,255,255,.6);
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.4;
+  font-weight: 300;
+}
+
+.nu-col.nope ul li::before { content: '×'; position: absolute; left: 0; color: var(--red); }
+.nu-col.pode ul li::before { content: '✓'; position: absolute; left: 0; color: var(--green); font-size: 11px; }
+
+/* TOM */
+.tom-pair { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+
+.tom-card {
+  padding: 16px 18px;
+  border-radius: 14px;
+}
+
+.tom-card.sim {
+  background: rgba(74,222,128,.06);
+  border: 1px solid rgba(74,222,128,.18);
+}
+
+.tom-card.nao {
+  background: rgba(255,92,92,.05);
+  border: 1px solid rgba(255,92,92,.12);
+}
+
+.tom-head {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-weight: 500;
+  margin-bottom: 7px;
+}
+
+.tom-card.sim .tom-head { color: var(--green); }
+.tom-card.nao .tom-head { color: rgba(255,92,92,.7); }
+
+.tom-quote {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.tom-card.sim .tom-quote { color: rgba(255,255,255,.8); }
+.tom-card.nao .tom-quote { color: rgba(255,255,255,.3); }
+
+/* VÍDEO BLOCKS */
+.vblocks { display: flex; flex-direction: column; gap: 2px; margin-bottom: 16px; }
+
+.vblock {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: background .2s;
+}
+
+.vblock:first-child { border-radius: 14px 14px 4px 4px; }
+.vblock:last-child { border-radius: 4px 4px 14px 14px; }
+
+.vblock:hover { background: var(--bg3); }
+
+.vb-time {
+  font-family: 'Lora', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--nu2);
+  min-width: 44px;
+  flex-shrink: 0;
+}
+
+.vb-info {}
+.vb-label { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+.vb-desc { font-size: 12px; color: var(--muted); font-weight: 300; line-height: 1.4; }
+
+/* EDIT CHIPS */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+.chip {
+  font-size: 12px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  color: rgba(255,255,255,.6);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+  transition: all .2s;
+}
+
+.chip:hover {
+  background: rgba(33,194,94,.1);
+  border-color: rgba(33,194,94,.3);
+  color: var(--nu2);
+}
+
+.chip-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--nu2);
+  flex-shrink: 0;
+}
+
+/* DRIVE STEPS */
+.drive-steps { display: flex; flex-direction: column; gap: 2px; }
+
+.dstep {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.dstep:first-child { border-radius: 14px 14px 4px 4px; }
+.dstep:last-child { border-radius: 4px 4px 14px 14px; }
+
+.ds-n {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--nu);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.ds-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+  font-weight: 300;
+}
+
+.ds-text strong { font-weight: 500; color: #fff; }
+
+/* HINT BOX */
+.hint {
+  background: rgba(33,194,94,.08);
+  border: 1px solid rgba(33,194,94,.2);
+  border-radius: 14px;
+  padding: 16px 18px;
+  font-size: 13px;
+  color: rgba(255,255,255,.65);
+  line-height: 1.6;
+  font-weight: 300;
+  margin-top: 12px;
+}
+
+.hint strong { color: var(--nu2); font-weight: 500; }
+
+/* COVER SCREEN */
+.cover-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: calc(100vh - 180px);
+  padding: 0 4px;
+}
+
+.cover-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--nu2);
+  border: 1px solid rgba(255,140,148,.25);
+  border-radius: 20px;
+  padding: 5px 12px;
+  margin-bottom: 24px;
+  width: fit-content;
+  font-weight: 400;
+}
+
+.badge-pulse {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--nu2);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+
+.cover-title {
+  font-family: 'Lora', serif;
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  letter-spacing: -.01em;
+}
+
+.cover-title .accent { color: var(--nu2); font-style: italic; }
+
+.cover-desc {
+  font-size: 15px;
+  color: var(--muted);
+  font-weight: 300;
+  line-height: 1.6;
+  margin-bottom: 36px;
+  max-width: 320px;
+}
+
+.cover-stats {
+  display: flex;
+  gap: 0;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.stat {
+  flex: 1;
+  padding: 14px 16px;
+  border-right: 1px solid var(--line);
+}
+
+.stat:last-child { border-right: none; }
+
+.stat-val {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+/* FINAL SCREEN */
+.final-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 180px);
+  text-align: center;
+}
+
+.final-nu-logo {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--nu);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Lora', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 auto 24px;
+}
+
+.final-title {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 12px;
+  max-width: 300px;
+}
+
+.final-title .accent { color: var(--nu2); font-style: italic; }
+
+.final-sub {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 260px;
+  margin-bottom: 32px;
+}
+
+.final-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--nu2);
+  background: rgba(33,194,94,.12);
+  border: 1px solid rgba(33,194,94,.3);
+  border-radius: 20px;
+  padding: 8px 18px;
+}
+
+/* SCROLLBAR */
+.screen::-webkit-scrollbar { width: 3px; }
+.screen::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="logo">
+      <svg width="92" height="14" viewBox="0 0 184 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M34.7106 21.0367V21.4534H28.1862V21.0367C29.3549 20.8589 29.802 20.4067 29.802 19.4209V10.7725C29.802 9.78669 29.4108 9.27856 28.364 9.18709L28.0032 9.15661V8.73994L33.0592 7.42387V19.4209C33.0592 20.4067 33.5063 20.8589 34.7055 21.0367H34.7106Z" fill="white"/>
+        <path d="M51.1334 21.0367V21.4534H44.609V21.0367C45.8082 20.8589 46.2553 20.4067 46.2553 19.4209V12.3274C46.2553 10.3812 45.2391 9.5123 43.8011 9.5123C42.2767 9.5123 40.7472 10.62 40.7472 13.1353V19.4209C40.7472 20.4067 41.1943 20.8589 42.3935 21.0367V21.4534H35.8691V21.0367C37.0378 20.8589 37.485 20.4067 37.485 19.4209V10.7725C37.485 9.78669 37.0937 9.27856 36.0469 9.18709L35.6862 9.15661V8.73994L40.7421 7.42387V10.9554C41.4585 8.94827 43.0439 7.42387 45.3813 7.42387C47.9271 7.42387 49.5125 9.10071 49.5125 12.0631V19.426C49.5125 20.4117 49.9596 20.864 51.1283 21.0418L51.1334 21.0367Z" fill="white"/>
+        <path d="M59.2483 8.17083C56.855 8.17083 55.2696 10.742 55.2696 13.8568C55.2696 17.2359 57.2463 19.6902 59.9953 19.6902C61.85 19.6902 63.288 18.5825 64.0044 16.9971L64.3347 17.0886C63.8266 20.0205 61.7331 21.8752 58.5573 21.8752C54.7259 21.8752 51.794 18.9128 51.794 14.6648C51.794 10.4168 54.8784 7.42387 59.1568 7.42387C60.6812 7.42387 62.3581 7.75416 63.5573 8.37916L63.288 11.9717H62.8713C62.541 9.57836 61.0471 8.17083 59.2483 8.17083Z" fill="white"/>
+        <path d="M71.2353 21.0368V21.4535H64.7109V21.0368C65.9101 20.859 66.3573 20.4067 66.3573 19.421V4.82231C66.3573 3.83654 65.9406 3.3284 64.8887 3.23694L64.528 3.20645V2.78978L69.6144 1.47372V19.426C69.6144 20.4118 70.0615 20.8641 71.2302 21.0419L71.2353 21.0368Z" fill="white"/>
+        <path d="M100.6 14.4869C100.6 19.4564 97.4905 21.8802 94.0148 21.8802C92.9376 21.8802 91.713 21.6414 90.6611 20.9503V25.3508C90.6611 26.367 91.3776 26.8193 93.0849 26.9361V27.3528H85.7831V26.9361C86.9518 26.7583 87.3989 26.306 87.3989 25.3508V10.7775C87.3989 9.79173 87.0077 9.2836 85.9609 9.19214L85.6002 9.16165V8.74498L90.6561 7.42892V10.7826C91.3167 8.50616 92.8715 7.40351 94.9041 7.40351C98.3746 7.40351 100.59 10.1881 100.59 14.497L100.6 14.4869ZM97.1297 15.1729C97.1297 11.494 95.8136 9.30901 93.8065 9.30901C92.1601 9.30901 90.6967 10.5082 90.6662 13.4096V16.8192C90.6662 19.304 91.774 21.1282 93.7506 21.1282C96.1134 21.1282 97.1297 18.5824 97.1297 15.1729Z" fill="white"/>
+        <path d="M85.4527 20.2288C84.406 20.1374 83.9842 19.6292 83.9842 18.6434V12.3019C83.9842 9.30905 81.9517 7.42387 78.4761 7.42387C75.0004 7.42387 72.5513 9.48689 72.4598 12.4188H75.8389C75.2088 10.2338 76.1082 8.17083 78.1407 8.17083C79.6651 8.17083 80.7119 9.33953 80.7119 11.0113V13.4249C80.7119 13.3944 72.4395 12.805 72.4395 18.3233C72.4395 20.4524 74.0909 21.9514 76.4588 21.9514C78.5574 21.9514 80.1478 20.93 80.8084 18.3843L80.8338 18.491V21.9666L85.8033 20.6811V20.2644L85.4426 20.2339L85.4527 20.2288ZM80.7271 16.7634C80.7271 19.0144 79.3501 20.1526 77.9984 20.1526C76.6468 20.1526 75.8084 19.1008 75.8084 17.7237C75.8084 14.0042 79.6092 13.7857 80.7271 13.7857V16.7634Z" fill="white"/>
+        <path d="M31.2044 1.46857V1.88524C29.1719 2.00719 28.4199 3.26228 27.7034 5.14745L21.3619 21.9057H20.9452L15.498 7.60173L10.0814 21.9057H9.66469L3.32321 5.20842C2.66263 3.4452 1.88517 2.06816 0 1.88524V1.46857H8.3791V1.88524C6.37198 1.91572 6.46346 3.40963 6.94111 4.75619L11.2805 16.5449L15.0509 6.40253L14.6037 5.20334C13.9432 3.46553 13.1352 2.06308 11.2805 1.88015V1.46349H19.6292V1.88015C17.622 1.91064 17.7135 3.40455 18.1911 4.7511L22.5306 16.6008L26.9005 4.95944C27.4392 3.46553 27.8558 1.90556 25.2847 1.87507V1.4584H31.2095L31.2044 1.46857Z" fill="white"/>
+        <path d="M113.085 21.0368C115.478 21.0368 117.094 19.5988 117.094 17.5052C117.094 11.3416 105.722 14.1821 105.722 6.54991C105.722 3.31819 108.324 1.04175 112.516 1.04175C114.848 1.04175 117.247 1.61086 119.249 2.62713L118.619 6.99707H118.202C117.363 3.25721 114.909 1.88017 112.394 1.88017C110.417 1.88017 108.771 3.16575 108.771 5.11189C108.771 10.6201 120.382 8.25215 120.382 15.9758C120.382 19.5683 117.419 21.8701 112.958 21.8701C110.026 21.8701 107.333 21.0317 105.687 19.6546L106.317 14.9239H106.733C107.841 18.7553 110.173 21.0317 113.08 21.0317L113.085 21.0368Z" fill="#CEABFF"/>
+        <path d="M130.626 19.7512C130.057 20.9199 128.71 21.8447 127.094 21.8447C124.701 21.8447 123.324 20.3508 123.324 17.6831V8.61292H121.53V8.19625C123.116 6.91067 124.615 5.59461 126.169 3.557H126.586V7.86596H130.387V8.61292H126.586V17.7136C126.586 19.3904 127.303 20.3152 128.741 20.3152C129.34 20.3152 129.909 20.0459 130.326 19.5683L130.626 19.7461V19.7512Z" fill="#CEABFF"/>
+        <path d="M146.368 20.2593V20.676L141.398 21.9615V18.4605L141.337 18.2217C140.677 20.2847 139.03 21.8752 136.637 21.8752C134.122 21.8752 132.536 20.1983 132.536 17.2359V10.7725C132.536 9.78668 132.12 9.27347 131.068 9.18709L130.707 9.1566V8.73993L135.794 7.42387V16.9717C135.794 18.9178 136.779 19.7867 138.217 19.7867C139.742 19.7867 141.271 18.679 141.271 16.1637V10.7775C141.271 9.79176 140.88 9.27855 139.833 9.19217L139.472 9.16168V8.74501L144.528 7.42895V18.6536C144.528 19.6394 144.945 20.1526 145.997 20.239L146.358 20.2695L146.368 20.2593Z" fill="#CEABFF"/>
+        <path d="M161.779 20.2592V20.6759L156.81 21.9614V18.4604L156.779 18.313C156.149 20.7673 154.564 21.936 152.44 21.936C149 21.936 146.754 19.121 146.754 14.8425C146.754 9.87296 149.894 7.44917 153.37 7.44917C154.447 7.44917 155.677 7.68799 156.693 8.37905V3.83126C156.693 2.84549 156.302 2.33227 155.255 2.24589L154.894 2.2154V1.79873L159.95 0.48267V18.6179C159.95 19.6037 160.372 20.1169 161.419 20.2338L161.779 20.2643V20.2592ZM156.693 15.9197V12.5102C156.693 9.99491 155.585 8.2012 153.609 8.2012C151.276 8.2012 150.224 10.7469 150.224 14.1565C150.224 17.81 151.54 20.0204 153.578 20.0204C155.224 20.0204 156.662 18.8212 156.688 15.9197H156.693Z" fill="#CEABFF"/>
+        <path d="M168.812 21.0367V21.4534H162.288V21.0367C163.456 20.8588 163.903 20.4066 163.903 19.4208V10.7724C163.903 9.78663 163.512 9.27342 162.465 9.18704L162.105 9.15655V8.73988L167.161 7.42382V19.4259C167.161 20.4117 167.608 20.8639 168.807 21.0418L168.812 21.0367ZM163.273 2.15448C163.273 0.955289 164.229 0 165.55 0C166.871 0 167.796 0.955289 167.796 2.15448C167.796 3.40957 166.84 4.33945 165.55 4.33945C164.259 4.33945 163.273 3.40957 163.273 2.15448Z" fill="#CEABFF"/>
+        <path d="M169.681 14.6648C169.681 10.3558 172.435 7.42387 176.475 7.42387C180.514 7.42387 183.299 10.3558 183.299 14.6648C183.299 18.9737 180.545 21.9056 176.475 21.9056C172.405 21.9056 169.681 18.9432 169.681 14.6648ZM179.823 14.6648C179.823 10.5032 178.594 8.17082 176.47 8.17082C174.346 8.17082 173.146 10.5032 173.146 14.6648C173.146 18.8264 174.376 21.1282 176.47 21.1282C178.563 21.1282 179.823 18.8213 179.823 14.6648Z" fill="#CEABFF"/>
+      </svg>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-dots" id="dots"></div>
+      <div class="progress-label" id="prog-label">1 / 6</div>
+    </div>
+  </div>
+
+  <!-- SCREENS -->
+  <div class="screens">
+
+    <!-- 0: COVER -->
+    <div class="screen active" id="s0">
+      <div class="cover-screen">
+        <div class="cover-badge"><div class="badge-pulse"></div>dinâmica creators</div>
+        <h1 class="cover-title">Copa sem<br>falar <span class="accent">Copa.</span></h1>
+        <p class="cover-desc">O desafio é falar da Copa do Mundo sem usar nenhum termo oficial da FIFA. Vamos nessa?</p>
+        <div class="cover-stats">
+          <div class="stat">
+            <div class="stat-val">40</div>
+            <div class="stat-label">minutos</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val">30s</div>
+            <div class="stat-label">vídeo</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val">📱</div>
+            <div class="stat-label">celular</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1: MISSÃO -->
+    <div class="screen" id="s1">
+      <div class="screen-eyebrow">01 — missão</div>
+      <h2 class="screen-title">O que fazer</h2>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-icon">🎬</div>
+          <div class="card-text">Criar um vídeo de <strong>15 a 30 segundos</strong> para o PicPay durante a Copa do Mundo.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-icon">👥</div>
+          <div class="card-text">Mesmo briefing pra todo mundo. O que muda é a <strong>ideia de cada grupo.</strong></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-icon">📱</div>
+          <div class="card-text">Único recurso: o <strong>celular.</strong> Edição simples e criativa é bem-vinda — o que vale é a ideia.</div>
+        </div>
+      </div>
+
+      <div class="proibido">
+        <div class="proibido-head">palavras proibidas — use uma = vídeo inválido</div>
+        <div class="tags">
+          <span class="tag">Copa do Mundo</span>
+          <span class="tag">FIFA</span>
+          <span class="tag">Mundial</span>
+          <span class="tag">nome de seleção</span>
+          <span class="tag">escudo oficial</span>
+          <span class="tag">taça oficial</span>
+          <span class="tag">mascote oficial</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2: PAPÉIS -->
+    <div class="screen" id="s2">
+      <div class="screen-eyebrow">02 — grupo</div>
+      <h2 class="screen-title">Quem faz o quê</h2>
+
+      <div class="roles">
+        <div class="role star">
+          <div class="role-top">
+            <div class="role-emoji">⭐</div>
+            <div class="role-name">Creator principal</div>
+          </div>
+          <div class="role-desc">É o rosto do vídeo. Decide o ângulo criativo e grava na frente da câmera.</div>
+        </div>
+        <div class="role">
+          <div class="role-top">
+            <div class="role-emoji">🧠</div>
+            <div class="role-name">Resto do grupo</div>
+          </div>
+          <div class="role-desc">Pensa na estratégia, no roteiro e na edição (e podem aparecer no vídeo se for necessário).</div>
+        </div>
+      </div>
+
+      <div class="hint">
+        <strong>Primeiro passo:</strong> antes de pensar na ideia, combinem quem vai ser o creator principal.
+      </div>
+    </div>
+
+    <!-- 3: MARCA -->
+    <div class="screen" id="s3">
+      <div class="screen-eyebrow">03 — briefing</div>
+      <h2 class="screen-title">A marca</h2>
+
+      <div class="nu-card">
+        <div class="nu-header">
+          <div style="height:28px;display:flex;align-items:center;">
+            <img src="/mnt/user-data/uploads/picpay-logo-2.png" style="height:22px;filter:brightness(0) invert(1);" alt="PicPay">
+          </div>
+          <div class="nu-header-text" style="margin-left:4px">
+            <div class="nu-sub">não é patrocinador oficial da Copa</div>
+          </div>
+        </div>
+        <div class="nu-cols">
+          <div class="nu-col nope">
+            <div class="nu-col-head">não pode</div>
+            <ul>
+              <li>"Copa", "FIFA", "Mundial"</li>
+              <li>Nome ou escudo de seleção</li>
+              <li>Taça ou mascote oficial</li>
+              <li>Imagens de jogos ou transmissões</li>
+              <li>Verde como referência à seleção</li>
+            </ul>
+          </div>
+          <div class="nu-col pode">
+            <div class="nu-col-head">pode</div>
+            <ul>
+              <li>"o jogo", "a festa", "o torneio"</li>
+              <li>Verde-lima como identidade própria</li>
+              <li>Resolver as contas sem constrangimento</li>
+              <li>Tom leve e descomplicado</li>
+              <li>Situações reais de pagamento em grupo</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="hint">
+        O desafio: <strong>como o PicPay encaixa num contexto que todo brasileiro conhece</strong> — sem revelar qual é?
+      </div>
+    </div>
+
+    <!-- 4: TOM + ESTRUTURA -->
+    <div class="screen" id="s4">
+      <div class="screen-eyebrow">04 — tom & vídeo</div>
+      <h2 class="screen-title">Como fazer</h2>
+
+      <div style="display:flex;justify-content:center;margin-bottom:20px;">
+        <img src="/mnt/user-data/uploads/picpay-logo-2.png" style="height:28px;" alt="PicPay">
+      </div>
+
+      <div class="tom-pair">
+        <div class="tom-card sim">
+          <div class="tom-head">tom certo</div>
+          <div class="tom-quote">"Aquela hora que todo mundo olha pro celular ao mesmo tempo pra rachar a conta. PicPay."</div>
+        </div>
+        <div class="tom-card nao">
+          <div class="tom-head">tom errado</div>
+          <div class="tom-quote">"PicPay na Copa do Mundo! Torça com a gente e pague com facilidade!!!"</div>
+        </div>
+      </div>
+
+      <div class="hint" style="margin-bottom:20px">PicPay é <strong>simples, leve e do cotidiano.</strong> Fala de momentos reais de pagamento — nunca do evento em si.</div>
+
+      <div class="vblocks">
+        <div class="vblock">
+          <div class="vb-time">0–3s</div>
+          <div class="vb-info">
+            <div class="vb-label">Gancho</div>
+            <div class="vb-desc">Prende a atenção logo de cara</div>
+          </div>
+        </div>
+        <div class="vblock">
+          <div class="vb-time">3–25s</div>
+          <div class="vb-info">
+            <div class="vb-label">A ideia</div>
+            <div class="vb-desc">Mensagem da marca, no tom do PicPay</div>
+          </div>
+        </div>
+        <div class="vblock">
+          <div class="vb-time">25–30s</div>
+          <div class="vb-info">
+            <div class="vb-label">Fechamento</div>
+            <div class="vb-desc">CTA direto no estilo da marca</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chips">
+        <div class="chip"><div class="chip-dot"></div>legenda</div>
+        <div class="chip"><div class="chip-dot"></div>música</div>
+        <div class="chip"><div class="chip-dot"></div>corte simples</div>
+        <div class="chip"><div class="chip-dot"></div>filtro de cor</div>
+        <div class="chip"><div class="chip-dot"></div>voz em off</div>
+        <div class="chip"><div class="chip-dot"></div>texto animado</div>
+      </div>
+    </div>
+
+    <!-- 5: ENTREGA -->
+    <div class="screen" id="s5">
+      <div class="screen-eyebrow">05 — entrega</div>
+      <h2 class="screen-title">Como enviar</h2>
+
+      <div class="drive-steps">
+        <div class="dstep">
+          <div class="ds-n">📁</div>
+          <div class="ds-text">Grave o vídeo no celular e envie nessa pasta do Drive. <strong>Nome do arquivo: seu nome ou nome do grupo.</strong></div>
+        </div>
+      </div>
+
+      <a href="https://drive.google.com/drive/folders/1JULu6bNtSMpnWld9KI_JkhG6KmEDy774?usp=drive_link" target="_blank" style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:16px 18px;background:rgba(33,194,94,.08);border:1px solid rgba(33,194,94,.25);border-radius:14px;text-decoration:none;transition:background .2s;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(33,194,94,.15);border:1px solid rgba(33,194,94,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📂</div>
+          <div>
+            <div style="font-size:14px;font-weight:500;color:#fff;">Pasta do Drive</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px;">toque pra abrir</div>
+          </div>
+        </div>
+        <div style="font-size:18px;color:var(--nu2);">→</div>
+      </a>
+
+      <div class="final-screen" style="min-height:auto; margin-top:40px; padding-bottom:8px">
+        <div style="display:flex;justify-content:center;margin-bottom:20px;">
+          <img src="/mnt/user-data/uploads/picpay-logo-2.png" style="height:32px;" alt="PicPay">
+        </div>
+        <div class="final-title">Como mostrar o PicPay sem mostrar a Copa — <span class="accent">mas fazendo todo mundo pensar nela?</span></div>
+        <div class="final-sub">Essa é a pergunta que vai desbloquear a ideia de vocês.</div>
+        <div class="final-chip">bora criar 🚀</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottombar">
+    <button class="btn-back" id="btn-back" onclick="prev()" style="display:none">← Voltar</button>
+    <button class="btn-next" id="btn-next" onclick="next()">
+      <span id="next-label">Começar</span>
+      <span class="arrow">→</span>
+    </button>
+  </div>
+
+</div>
+
+<script>
+const TOTAL = 6;
+let cur = 0;
+
+const labels = ['Começar', 'Próximo', 'Próximo', 'Próximo', 'Próximo', ''];
+
+function buildDots() {
+  const wrap = document.getElementById('dots');
+  wrap.innerHTML = '';
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < cur ? ' done' : i === cur ? ' active' : '');
+    wrap.appendChild(d);
+  }
+}
+
+function updateUI() {
+  document.getElementById('prog-label').textContent = (cur + 1) + ' / ' + TOTAL;
+  document.getElementById('next-label').textContent = labels[cur] || 'Próximo';
+  document.getElementById('btn-back').style.display = cur > 0 ? 'block' : 'none';
+  document.getElementById('btn-next').style.display = cur === TOTAL - 1 ? 'none' : 'flex';
+  buildDots();
+}
+
+function go(next) {
+  const current = document.getElementById('s' + cur);
+  current.classList.remove('active');
+  current.classList.add('exit');
+  setTimeout(() => current.classList.remove('exit'), 380);
+
+  cur = next;
+
+  const incoming = document.getElementById('s' + cur);
+  incoming.style.transform = 'translateX(40px)';
+  incoming.style.opacity = '0';
+  incoming.classList.add('active');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      incoming.style.transform = '';
+      incoming.style.opacity = '';
+    });
+  });
+
+  // Scroll to top
+  incoming.scrollTop = 0;
+  updateUI();
+}
+
+function next() {
+  if (cur < TOTAL - 1) go(cur + 1);
+}
+
+function prev() {
+  if (cur > 0) {
+    const current = document.getElementById('s' + cur);
+    current.classList.remove('active');
+
+    cur--;
+
+    const incoming = document.getElementById('s' + cur);
+    incoming.style.transform = 'translateX(-40px)';
+    incoming.style.opacity = '0';
+    incoming.classList.add('active');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        incoming.style.transform = '';
+        incoming.style.opacity = '';
+      });
+    });
+
+    incoming.scrollTop = 0;
+    updateUI();
+  }
+}
+
+buildDots();
+updateUI();
+</script>
+</body>
+</html>
